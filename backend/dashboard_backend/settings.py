@@ -54,6 +54,9 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+# Allow requests from React
+CORS_ALLOW_ALL_ORIGINS = True  # For development only!
+
 ROOT_URLCONF = 'dashboard_backend.urls'
 
 TEMPLATES = [
