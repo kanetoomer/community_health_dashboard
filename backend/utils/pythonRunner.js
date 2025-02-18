@@ -4,20 +4,20 @@ const runPythonScript = (scriptPath, args = []) => {
   return new Promise((resolve, reject) => {
     // Use PYTHON_CMD from environment if set; otherwise default to "python3"
     const pythonExecutable = process.env.PYTHON_CMD || "python3";
-    const process = spawn(pythonExecutable, [scriptPath, ...args]);
+    const pyProc = spawn(pythonExecutable, [scriptPath, ...args]);
 
     let dataString = "";
     let errorString = "";
 
-    process.stdout.on("data", (data) => {
+    pyProc.stdout.on("data", (data) => {
       dataString += data.toString();
     });
 
-    process.stderr.on("data", (data) => {
+    pyProc.stderr.on("data", (data) => {
       errorString += data.toString();
     });
 
-    process.on("close", (code) => {
+    pyProc.on("close", (code) => {
       if (code !== 0) {
         return reject(
           new Error(`Python script exited with code ${code}: ${errorString}`)
