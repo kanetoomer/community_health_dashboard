@@ -2,7 +2,9 @@ const { spawn } = require("child_process");
 
 const runPythonScript = (scriptPath, args = []) => {
   return new Promise((resolve, reject) => {
-    const process = spawn("python3", [scriptPath, ...args]);
+    // Use PYTHON_CMD from environment if set; otherwise default to "python3"
+    const pythonExecutable = process.env.PYTHON_CMD || "python3";
+    const process = spawn(pythonExecutable, [scriptPath, ...args]);
 
     let dataString = "";
     let errorString = "";

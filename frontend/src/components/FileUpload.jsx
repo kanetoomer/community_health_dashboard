@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { PlusIcon } from "@heroicons/react/20/solid";
 import { uploadFile, analyzeFile } from "../services/api";
 
 export default function FileUpload() {
@@ -11,12 +12,6 @@ export default function FileUpload() {
     removeDuplicates: false,
     handleMissing: false,
     standardizeFormats: false,
-  });
-
-  // Filters state (only date and location)
-  const [filters, setFilters] = useState({
-    date: "",
-    location: "",
   });
 
   // Handle file selection
@@ -33,15 +28,6 @@ export default function FileUpload() {
     }));
   };
 
-  // Handle filter input changes
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   // Handle file upload and analysis
   const handleUpload = async () => {
     if (!file) {
@@ -54,11 +40,10 @@ export default function FileUpload() {
       const uploadResponse = await uploadFile(file);
       const filePath = uploadResponse.filePath;
 
-      // Step 2: Generate the report using the uploaded file plus cleaning options & filters
+      // Step 2: Generate the report using the uploaded file and cleaning options
       const reportResponse = await analyzeFile({
         filePath,
         cleaningOptions,
-        filters,
       });
       setReport(reportResponse);
     } catch (error) {
@@ -125,7 +110,7 @@ export default function FileUpload() {
     );
   }
 
-  // Otherwise, show the file upload UI with cleaning and filtering options
+  // Otherwise, show the file upload UI with cleaning options only
   return (
     <>
       <header>
@@ -211,37 +196,6 @@ export default function FileUpload() {
                     Standardize formats (e.g., ZIP codes, dates)
                   </span>
                 </label>
-              </div>
-            </div>
-            {/* Filter Options */}
-            <div className="mt-6">
-              <h4 className="text-lg font-semibold text-gray-900">Filters</h4>
-              <div className="mt-2 space-y-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={filters.date}
-                    onChange={handleFilterChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    placeholder="Enter location"
-                    value={filters.location}
-                    onChange={handleFilterChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
               </div>
             </div>
             {/* Upload/Generate Report Button */}
