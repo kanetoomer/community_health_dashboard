@@ -31,7 +31,7 @@ export default function Dashboard({ url }) {
       setUser(JSON.parse(userData));
     } else {
       // If no user info is stored, redirect to sign in.
-      navigate("/sign-in", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
@@ -48,7 +48,7 @@ export default function Dashboard({ url }) {
 
   // Protect the route – if user isn’t loaded, redirect.
   if (!user) {
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

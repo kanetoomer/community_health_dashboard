@@ -28,9 +28,14 @@ exports.register = async (req, res, next) => {
 
     // Generate JWT token
     const token = createToken(user._id);
-    res.json({ success: true, token });
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Return token and user info (excluding sensitive data)
+    res.status(201).json({
+      success: true,
+      token,
+      user: { name: user.username, email: user.email },
+      message: "User registered successfully",
+    });
   } catch (error) {
     next(error);
   }
@@ -55,7 +60,13 @@ exports.login = async (req, res, next) => {
 
     // Generate JWT token
     const token = createToken(user._id);
-    res.json({ success: true, token });
+
+    // Return both token and user info (make sure to only send non-sensitive info)
+    res.json({
+      success: true,
+      token,
+      user: { name: user.username, email: user.email },
+    });
   } catch (error) {
     next(error);
   }
