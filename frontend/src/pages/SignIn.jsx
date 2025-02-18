@@ -15,7 +15,7 @@ export default function SignIn() {
         { email, password }
       );
       const { token } = response.data;
-      // Store token (you may also store user info if returned)
+      // Store token (and user info is inside it)
       localStorage.setItem("token", token);
       // Redirect to the dashboard
       navigate("/dashboard");

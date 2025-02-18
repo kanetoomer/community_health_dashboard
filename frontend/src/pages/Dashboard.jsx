@@ -43,7 +43,7 @@ export default function Dashboard() {
   };
 
   // Define navigation links
-  const navigation = [{ name: "File Upload", href: "/" }];
+  const navigation = [{ name: "File Upload", href: "/dashboard" }];
   // We'll use a click handler on sign out rather than href.
   const userNavigation = [{ name: "Sign out", onClick: handleSignOut }];
 
@@ -186,7 +186,7 @@ export default function Dashboard() {
         <main>
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <Routes>
-              <Route path="/" element={<FileUpload />} />
+              <Route path="/dashboard" element={<FileUpload />} />
               {/* Add other routes for your dashboard if needed */}
             </Routes>
           </div>
