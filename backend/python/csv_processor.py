@@ -5,6 +5,7 @@ import json
 import base64
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
@@ -58,14 +59,21 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
         buf.seek(0)
         histogram_plot = base64.b64encode(buf.getvalue()).decode('utf-8')
 
-        # For this example, we'll use the same plot for the correlation plot.
-        # In practice, replace this with your actual correlation plot generation.
-        correlation_plot = histogram_plot
+        # Generate a correlation plot (heatmap) even if there's only one numeric column
+        plt.figure(figsize=(8, 6))
+        corr = df[numeric_cols].corr()
+        sns.heatmap(corr, annot=True, cmap='coolwarm')
+        plt.title("Correlation Matrix")
+        buf2 = io.BytesIO()
+        plt.savefig(buf2, format='png')
+        plt.close()
+        buf2.seek(0)
+        correlation_plot = base64.b64encode(buf2.getvalue()).decode('utf-8')
 
-        # Generate PDF report using ReportLab
+        # Generate PDF report using ReportLab (each page has distinct content)
         pdf_report = generate_pdf_report(summary, missing_summary, outliers_summary, histogram_plot, correlation_plot)
 
-        # Return a dictionary with all analysis results and the report (PDF encoded in base64)
+        # Return all analysis results along with the PDF report (PDF encoded in base64)
         return {
             "summary": summary,
             "missingSummary": missing_summary,

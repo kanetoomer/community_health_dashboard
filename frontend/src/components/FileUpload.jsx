@@ -158,13 +158,13 @@ export default function FileUpload() {
         </div>
       </header>
       <div className="mt-10 border-2 border-dashed border-gray-300 rounded-lg p-6">
-        <div className="text-center">
+        <div className="pb-6">
           <svg
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
             aria-hidden="true"
-            className="mx-auto w-12 h-12 text-gray-400"
+            className="w-12 h-12 text-gray-400"
           >
             <path
               d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
@@ -201,7 +201,7 @@ export default function FileUpload() {
                 Data Cleaning Options
               </h4>
               <div className="mt-2 space-y-2">
-                <label className="inline-flex items-center">
+                <label className="flex items-center">
                   <input
                     type="checkbox"
                     name="removeDuplicates"
@@ -211,7 +211,7 @@ export default function FileUpload() {
                   />
                   <span className="ml-2">Remove duplicates</span>
                 </label>
-                <label className="inline-flex items-center">
+                <label className="flex items-center">
                   <input
                     type="checkbox"
                     name="handleMissing"
@@ -221,7 +221,7 @@ export default function FileUpload() {
                   />
                   <span className="ml-2">Handle missing values</span>
                 </label>
-                <label className="inline-flex items-center">
+                <label className="flex items-center">
                   <input
                     type="checkbox"
                     name="standardizeFormats"
