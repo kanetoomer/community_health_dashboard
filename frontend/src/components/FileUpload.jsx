@@ -58,16 +58,6 @@ export default function FileUpload() {
     setLoading(false);
   };
 
-  // Handle download of the generated image (histogram)
-  const handleDownloadImage = () => {
-    if (report && report.histogramPlot) {
-      const link = document.createElement("a");
-      link.href = `data:image/png;base64,${report.histogramPlot}`;
-      link.download = "report_image.png";
-      link.click();
-    }
-  };
-
   // Handle download of the generated PDF report
   const handleDownloadPDF = () => {
     if (report && report.pdfReport) {
@@ -144,14 +134,8 @@ export default function FileUpload() {
           <p>No correlation plot available.</p>
         )}
 
-        {/* Download Buttons */}
+        {/* Download PDF Button */}
         <div className="flex space-x-4">
-          <button
-            onClick={handleDownloadImage}
-            className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Download Image
-          </button>
           <button
             onClick={handleDownloadPDF}
             className="mt-4 inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
