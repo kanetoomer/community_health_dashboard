@@ -1,18 +1,25 @@
 import axios from "axios";
 
-// Base API URL
-const API_URL = "http://localhost:8000/api/";
-
-// Upload file (CSV)
-export const uploadFile = (file) => {
+// Upload file endpoint (adjust the URL as needed)
+export const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
-  return axios.post(`${API_URL}upload/`, formData);
+  const response = await axios.post(
+    "http://localhost:5000/api/upload/csv",
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
+  return response.data; // Should include filePath
 };
 
-// Fetch health data
-export const fetchHealthData = () => axios.get(`${API_URL}healthdata/`);
-
-// Generate PDF report
-export const generateReport = () =>
-  axios.get(`${API_URL}generate-report/`, { responseType: "blob" });
+// Analyze file endpoint (adjust the URL as needed)
+// Now accepts an object containing filePath, cleaningOptions, and filters
+export const analyzeFile = async (payload) => {
+  const response = await axios.post(
+    "http://localhost:5000/api/analyze",
+    payload
+  );
+  return response.data;
+};
