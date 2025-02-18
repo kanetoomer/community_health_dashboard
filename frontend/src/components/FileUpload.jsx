@@ -38,6 +38,7 @@ export default function FileUpload() {
     try {
       // Step 1: Upload the file
       const uploadResponse = await uploadFile(file);
+      console.log("Upload response:", uploadResponse);
       const filePath = uploadResponse.filePath;
 
       // Step 2: Generate the report using the uploaded file and cleaning options
@@ -45,6 +46,10 @@ export default function FileUpload() {
         filePath,
         cleaningOptions,
       });
+
+      // Debug logging: output the full backend response
+      console.log("Report received:", reportResponse);
+
       setReport(reportResponse);
     } catch (error) {
       console.error("Upload or analysis failed:", error);
@@ -53,7 +58,7 @@ export default function FileUpload() {
     setLoading(false);
   };
 
-  // Handle download of the generated image
+  // Handle download of the generated image (histogram)
   const handleDownloadImage = () => {
     if (report && report.histogramPlot) {
       const link = document.createElement("a");
@@ -73,25 +78,73 @@ export default function FileUpload() {
     }
   };
 
-  // If a report exists, show the report UI with download options
+  // If a report exists, show the full report UI
   if (report) {
     return (
       <div className="max-w-4xl mx-auto p-4">
         <h2 className="text-2xl font-bold mb-4">Report</h2>
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold">Summary Statistics:</h3>
-          <pre className="bg-gray-100 p-2 rounded text-xs">
-            {JSON.stringify(report.summary, null, 2)}
-          </pre>
-        </div>
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold">Interactive Chart:</h3>
-          <img
-            src={`data:image/png;base64,${report.histogramPlot}`}
-            alt="Report Plot"
-            className="max-w-full h-auto border"
-          />
-        </div>
+
+        {/* Summary Statistics */}
+        {report.summary ? (
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold">Summary Statistics:</h3>
+            <pre className="bg-gray-100 p-2 rounded text-xs">
+              {JSON.stringify(report.summary, null, 2)}
+            </pre>
+          </div>
+        ) : (
+          <p>No summary statistics available.</p>
+        )}
+
+        {/* Missing Values Summary */}
+        {report.missingSummary && (
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold">Missing Values Summary:</h3>
+            <pre className="bg-gray-100 p-2 rounded text-xs">
+              {JSON.stringify(report.missingSummary, null, 2)}
+            </pre>
+          </div>
+        )}
+
+        {/* Outliers Summary */}
+        {report.outliersSummary && (
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold">Outliers Summary:</h3>
+            <pre className="bg-gray-100 p-2 rounded text-xs">
+              {JSON.stringify(report.outliersSummary, null, 2)}
+            </pre>
+          </div>
+        )}
+
+        {/* Histogram Plot */}
+        {report.histogramPlot ? (
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold">Histogram Plot:</h3>
+            <img
+              src={`data:image/png;base64,${report.histogramPlot}`}
+              alt="Histogram Plot"
+              className="max-w-full h-auto border"
+            />
+          </div>
+        ) : (
+          <p>No histogram available.</p>
+        )}
+
+        {/* Correlation Plot */}
+        {report.correlationPlot ? (
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold">Correlation Plot:</h3>
+            <img
+              src={`data:image/png;base64,${report.correlationPlot}`}
+              alt="Correlation Plot"
+              className="max-w-full h-auto border"
+            />
+          </div>
+        ) : (
+          <p>No correlation plot available.</p>
+        )}
+
+        {/* Download Buttons */}
         <div className="flex space-x-4">
           <button
             onClick={handleDownloadImage}
