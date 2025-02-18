@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 
-export default function SignIn({ url }) {
+export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -10,12 +10,12 @@ export default function SignIn({ url }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${url}/api/auth/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://community-health-dashboard-backend.onrender.com/api/auth/login",
+        { email, password }
+      );
       const { token } = response.data;
-      // Store token in localStorage (or your preferred storage)
+      // Store token (you may also store user info if returned)
       localStorage.setItem("token", token);
       // Redirect to the dashboard
       navigate("/dashboard");
