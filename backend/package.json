@@ -4,7 +4,7 @@
   "description": "Backend for community health dashboard",
   "main": "server.js",
   "scripts": {
-    "postinstall": "pip3 install -r requirements.txt",
+    "postinstall": "python3 -m venv venv && . venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt",
     "start": "node server.js"
   },
   "dependencies": {
