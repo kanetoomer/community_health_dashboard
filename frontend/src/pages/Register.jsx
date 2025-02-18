@@ -19,7 +19,7 @@ export default function Register({ url }) {
         password,
       });
       console.log("Registration response:", response.data);
-      // Redirect to the sign-in page after successful registration
+      // After successful registration, redirect the user to sign in.
       navigate("/sign-in");
     } catch (error) {
       console.error("Registration error:", error);

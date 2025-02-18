@@ -20,18 +20,18 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Dashboard() {
+export default function Dashboard({ url }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  // Load user data from local storage on mount.
+  // Load user data from localStorage on mount.
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
       setUser(JSON.parse(userData));
     } else {
-      // If not logged in, redirect to sign in.
-      navigate("/", { replace: true });
+      // If no user info is stored, redirect to sign in.
+      navigate("/sign-in", { replace: true });
     }
   }, [navigate]);
 
@@ -42,14 +42,13 @@ export default function Dashboard() {
     navigate("/", { replace: true });
   };
 
-  // Define navigation links
+  // Navigation links for the navbar
   const navigation = [{ name: "File Upload", href: "/dashboard" }];
-  // We'll use a click handler on sign out rather than href.
   const userNavigation = [{ name: "Sign out", onClick: handleSignOut }];
 
-  // If the user is not loaded (or logged out), protect the route.
+  // Protect the route – if user isn’t loaded, redirect.
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/sign-in" replace />;
   }
 
   return (
@@ -187,7 +186,7 @@ export default function Dashboard() {
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <Routes>
               <Route path="/dashboard" element={<FileUpload />} />
-              {/* Add other routes for your dashboard if needed */}
+              {/* Add additional dashboard routes here */}
             </Routes>
           </div>
         </main>

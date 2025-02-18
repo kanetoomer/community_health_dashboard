@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 
-export default function SignIn() {
+export default function SignIn({ url }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -10,14 +10,17 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "https://community-health-dashboard-backend.onrender.com/api/auth/login",
-        { email, password }
-      );
-      const { token } = response.data;
-      // Store token (and user info is inside it)
+      const response = await axios.post(`${url}/api/auth/login`, {
+        email,
+        password,
+      });
+      // Expecting the backend to return { token, user }
+      const { token, user } = response.data;
       localStorage.setItem("token", token);
-      // Redirect to the dashboard
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+      // Redirect to the dashboard upon successful login
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);

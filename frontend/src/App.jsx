@@ -7,7 +7,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import PrivateRoute from "./PrivateRoute.jsx";
 
 function App() {
-  const url = "https://community-health-dashboard-backend.onrender.com/";
+  const url = "https://community-health-dashboard-backend.onrender.com";
   return (
     <div>
       <Routes>
