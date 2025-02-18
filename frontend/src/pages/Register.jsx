@@ -20,7 +20,7 @@ export default function Register({ url }) {
       });
       console.log("Registration response:", response.data);
       // After successful registration, redirect the user to sign in.
-      navigate("/sign-in");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Registration error:", error);
       alert("Registration failed. Please try again.");
