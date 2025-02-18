@@ -4,8 +4,8 @@
   "description": "Backend for community health dashboard",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "postinstall": "pip3 install -r requirements.txt",
+    "start": "node server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
