@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
 
-export default function Register() {
+export default function Register({ url }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,10 +13,11 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(
-        "https://community-health-dashboard-backend.onrender.com/api/auth/register",
-        { username, email, password }
-      );
+      const response = await axios.post(`${url}/api/auth/register`, {
+        username,
+        email,
+        password,
+      });
       console.log("Registration response:", response.data);
       // Redirect to the sign-in page after successful registration
       navigate("/sign-in");

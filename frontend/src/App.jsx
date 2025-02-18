@@ -7,14 +7,14 @@ import Landing from "./pages/Landing.jsx";
 
 function App() {
   const url = "https://community-health-dashboard-backend.onrender.com/";
+
   return (
     <div>
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/sign-in" element={<SignIn url={url} />} />
         <Route path="/register" element={<Register url={url} />} />
         <Route path="/dashboard" element={<Dashboard url={url} />} />
-        {/* Default route could be your landing page or redirect */}
-        <Route path="/" element={<Landing url={url} />} />
         {/* Catch-all route for 404s */}
         <Route path="*" element={<div>Page not found</div>} />
       </Routes>
