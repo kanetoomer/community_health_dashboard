@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import SignIn from "./pages/SignIn";
 
 function App() {
-  const url = "http://localhost:5174/";
+  const url = "https://community-health-dashboard-backend.onrender.com/";
   return (
     <>
       <Routes>

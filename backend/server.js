@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
+const cors = require("cors");
 
 // Load environment variables
 require("dotenv").config();
@@ -9,6 +10,8 @@ require("dotenv").config();
 connectDB();
 
 const app = express();
+
+app.use(cors());
 
 // Middleware
 app.use(bodyParser.json());

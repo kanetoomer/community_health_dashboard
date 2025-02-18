@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { PlusIcon } from "@heroicons/react/20/solid";
 import { uploadFile, analyzeFile } from "../services/api";
 
 export default function FileUpload() {
