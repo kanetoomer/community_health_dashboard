@@ -1,28 +1,30 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
-export default function SignIn() {
+export default function Register() {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await axios.post(
-        "https://community-health-dashboard-backend.onrender.com/api/auth/login",
-        { email, password }
+        "https://community-health-dashboard-backend.onrender.com/api/auth/register",
+        { username, email, password }
       );
-      const { token } = response.data;
-      // Store token (you may also store user info if returned)
-      localStorage.setItem("token", token);
-      // Redirect to the dashboard
-      navigate("/dashboard");
+      console.log("Registration response:", response.data);
+      // Redirect to the sign-in page after successful registration
+      navigate("/sign-in");
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Please check your credentials.");
+      console.error("Registration error:", error);
+      alert("Registration failed. Please try again.");
     }
+    setLoading(false);
   };
 
   return (
@@ -32,13 +34,33 @@ export default function SignIn() {
           <h1>Community Health Dashboard</h1>
         </div>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
-          Sign in to your account
+          Create an account
         </h2>
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
         <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-900"
+              >
+                Username
+              </label>
+              <div className="mt-2">
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:outline-indigo-600 sm:text-sm"
+                />
+              </div>
+            </div>
+
             <div>
               <label
                 htmlFor="email"
@@ -81,52 +103,25 @@ export default function SignIn() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <div className="flex h-6 items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                </div>
-                <label
-                  htmlFor="remember-me"
-                  className="block text-sm text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot password?
-                </a>
-              </div>
-            </div>
-
             <div className="mt-12">
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                disabled={loading}
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                Sign in
+                {loading ? "Registering..." : "Register"}
               </button>
             </div>
           </form>
         </div>
 
         <p className="mt-10 text-center text-sm text-gray-500">
-          Not a member?{" "}
+          Have an account?{" "}
           <NavLink
-            to="/register"
+            to="/sign-in"
             className="font-semibold text-indigo-600 hover:text-indigo-500"
           >
-            Create an account
+            Sign In instead
           </NavLink>
         </p>
       </div>
