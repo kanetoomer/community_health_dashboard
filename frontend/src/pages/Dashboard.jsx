@@ -31,7 +31,7 @@ export default function Dashboard() {
       setUser(JSON.parse(userData));
     } else {
       // If not logged in, redirect to sign in.
-      navigate("/sign-in", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
