@@ -39,7 +39,7 @@ export default function Dashboard() {
   const handleSignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    navigate("/sign-in", { replace: true });
+    navigate("/", { replace: true });
   };
 
   // Define navigation links
@@ -49,7 +49,7 @@ export default function Dashboard() {
 
   // If the user is not loaded (or logged out), protect the route.
   if (!user) {
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (
