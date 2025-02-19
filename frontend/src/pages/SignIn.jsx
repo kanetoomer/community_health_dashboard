@@ -1,26 +1,24 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function SignIn({ url }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${url}/api/auth/login`, {
-        email,
-        password,
-      });
-      // Expecting the backend to return { token, user }
+      const response = await axios.post(
+        "https://community-health-dashboard-backend.onrender.com/api/auth/login",
+        { email, password }
+      );
       const { token, user } = response.data;
-      localStorage.setItem("token", token);
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
-      }
-      // Redirect to the dashboard upon successful login
+      // Use context helper to sign in (this updates localStorage as well)
+      signIn({ token, user });
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);

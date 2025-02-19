@@ -15,7 +15,7 @@ function App() {
         <Route path="/sign-in" element={<SignIn url={url} />} />
         <Route path="/register" element={<Register url={url} />} />
         <Route
-          path="/dashboard"
+          path="/dashboard/*"
           element={
             <PrivateRoute>
               <Dashboard url={url} />

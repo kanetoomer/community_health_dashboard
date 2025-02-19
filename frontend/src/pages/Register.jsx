@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Register({ url }) {
   const [username, setUsername] = useState("");
@@ -8,6 +9,7 @@ export default function Register({ url }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,8 +20,8 @@ export default function Register({ url }) {
         email,
         password,
       });
-      console.log("Registration response:", response.data);
-      // After successful registration, redirect the user to sign in.
+      const { token, user } = response.data;
+      signIn({ token, user });
       navigate("/dashboard");
     } catch (error) {
       console.error("Registration error:", error);
