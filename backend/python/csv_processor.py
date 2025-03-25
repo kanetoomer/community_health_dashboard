@@ -23,38 +23,44 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
         if ext == '.csv':
             df = pd.read_csv(file_path)
         elif ext == '.data':
-            # Attempt to read .data file (assuming space or comma separated, no header)
+            # Attempt to read .data file (space or comma separated, no header)
             try:
-                df = pd.read_csv(file_path, header=None, delimiter=r'\s+')
+                df = pd.read_csv(file_path, header=None, delimiter=',', skipinitialspace=True)
             except Exception:
                 df = pd.read_csv(file_path, header=None, delimiter=',')
-            # Optional: Assign generic column names
             df.columns = [f"col_{i}" for i in range(df.shape[1])]
         else:
             return {"error": f"Unsupported file type: {ext}"}
 
-        # Data Cleaning Options
+        # Data Cleaning
         if cleaning_options.get("removeDuplicates", False):
             df = df.drop_duplicates()
 
         if cleaning_options.get("handleMissing", False):
-            # Fill missing values using forward fill as an example
             df = df.fillna(method='ffill')
 
         if cleaning_options.get("standardizeFormats", False):
-            # Standardize date and ZIP code formats if they exist
             if 'date' in df.columns:
                 df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.strftime('%Y-%m-%d')
             if 'zip' in df.columns:
                 df['zip'] = df['zip'].astype(str).str.zfill(5)
 
-        # Compute summary statistics
+        # Exit early if empty
+        if df.empty:
+            return {"error": "The uploaded dataset is empty."}
+
+        # Identify numeric columns
+        numeric_cols = df.select_dtypes(include='number').columns
+        if len(numeric_cols) == 0:
+            return {"error": "No numeric columns found in dataset after cleaning."}
+
+        # Summary Statistics
         summary = df.describe().to_dict()
 
-        # Missing values summary (for each column)
+        # Missing Values Summary
         missing_summary = {col: int(df[col].isna().sum()) for col in df.columns}
 
-        # Outliers summary 
+        # Outliers Summary (IQR method)
         outliers_summary = {}
         for col in numeric_cols:
             Q1 = df[col].quantile(0.25)
@@ -69,10 +75,7 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
                 "upper_bound": round(upper_bound, 2)
             }
 
-        # Generate a histogram for the first numeric column
-        numeric_cols = df.select_dtypes(include='number').columns
-        if len(numeric_cols) == 0:
-            return {"error": "No numeric columns found in CSV after cleaning/filtering."}
+        # Histogram Plot for the first numeric column
         col = numeric_cols[0]
         plt.figure()
         df[col].hist(bins=30)
@@ -85,7 +88,7 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
         buf.seek(0)
         histogram_plot = base64.b64encode(buf.getvalue()).decode('utf-8')
 
-        # Generate a correlation plot (heatmap) even if there's only one numeric column
+        # Correlation Plot
         plt.figure(figsize=(8, 6))
         corr = df[numeric_cols].corr()
         sns.heatmap(corr, annot=True, cmap='coolwarm')
@@ -96,10 +99,16 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
         buf2.seek(0)
         correlation_plot = base64.b64encode(buf2.getvalue()).decode('utf-8')
 
-        # Generate PDF report using ReportLab (each page has distinct content)
-        pdf_report = generate_pdf_report(summary, missing_summary, outliers_summary, histogram_plot, correlation_plot)
+        # PDF Report
+        pdf_report = generate_pdf_report(
+            summary,
+            missing_summary,
+            outliers_summary,
+            histogram_plot,
+            correlation_plot
+        )
 
-        # Return all analysis results along with the PDF report (PDF encoded in base64)
+        # Final response
         return {
             "summary": summary,
             "missingSummary": missing_summary,
@@ -109,6 +118,7 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
             "pdfReport": base64.b64encode(pdf_report).decode("utf-8"),
             "message": "Analysis and plots generated successfully"
         }
+
     except Exception as e:
         return {"error": str(e)}
 

@@ -2,27 +2,46 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+
 const router = express.Router();
 
-// Configure storage for multer
+// Ensure upload folder exists
+const uploadDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Multer setup
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Ensure the "uploads" folder exists
-    cb(null, path.join(__dirname, "../uploads"));
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-const upload = multer({ storage });
-
-router.post("/csv", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [".csv", ".data"];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowedTypes.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only .csv and .data files are allowed"), false);
   }
-  // Return the file path to be used by the Python script.
-  // You might want to return a relative path or an absolute path depending on your setup.
+};
+
+const upload = multer({ storage, fileFilter });
+
+router.post("/", upload.single("file"), (req, res) => {
+  console.log("Upload route hit!");
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ error: "No file uploaded or invalid file type" });
+  }
+
   const filePath = path.join("uploads", req.file.filename);
   res.json({ filePath });
 });
