@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import io
+import os
 import json
 import base64
 import pandas as pd
@@ -8,13 +9,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
 from reportlab.lib.utils import ImageReader
 from PIL import Image
 
 def analyze_and_plot(file_path, cleaning_options={}, filters={}):
     try:
-        # Read CSV data
-        df = pd.read_csv(file_path)
+        # Detect file extension
+        _, ext = os.path.splitext(file_path)
+
+        # Load the dataset based on file extension
+        if ext == '.csv':
+            df = pd.read_csv(file_path)
+        elif ext == '.data':
+            # Attempt to read .data file (assuming space or comma separated, no header)
+            try:
+                df = pd.read_csv(file_path, header=None, delimiter=r'\s+')
+            except Exception:
+                df = pd.read_csv(file_path, header=None, delimiter=',')
+            # Optional: Assign generic column names
+            df.columns = [f"col_{i}" for i in range(df.shape[1])]
+        else:
+            return {"error": f"Unsupported file type: {ext}"}
 
         # Data Cleaning Options
         if cleaning_options.get("removeDuplicates", False):
@@ -31,17 +48,26 @@ def analyze_and_plot(file_path, cleaning_options={}, filters={}):
             if 'zip' in df.columns:
                 df['zip'] = df['zip'].astype(str).str.zfill(5)
 
-        # (Optional) Apply filters here if needed
-        # For this example, we skip filtering.
-
         # Compute summary statistics
         summary = df.describe().to_dict()
 
         # Missing values summary (for each column)
         missing_summary = {col: int(df[col].isna().sum()) for col in df.columns}
 
-        # Outliers summary placeholder (implement your outlier detection logic here)
-        outliers_summary = {}  # e.g., you might count values beyond 1.5 * IQR
+        # Outliers summary 
+        outliers_summary = {}
+        for col in numeric_cols:
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+            outliers_summary[col] = {
+                "count": int(outliers.shape[0]),
+                "lower_bound": round(lower_bound, 2),
+                "upper_bound": round(upper_bound, 2)
+            }
 
         # Generate a histogram for the first numeric column
         numeric_cols = df.select_dtypes(include='number').columns
@@ -91,53 +117,103 @@ def generate_pdf_report(summary, missing_summary, outliers_summary, histogram_pl
     c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
     margin = 40
+    line_height = 14
 
-    # Page 1: Summary Statistics
-    text = c.beginText(margin, height - margin)
-    text.setFont("Helvetica", 10)
-    text.textLine("Data Analysis Report")
-    text.textLine("")
-    text.textLine("Summary Statistics:")
-    summary_str = json.dumps(summary, indent=2)
-    for line in summary_str.splitlines():
-        text.textLine(line)
-    c.drawText(text)
+    def draw_page_number():
+        c.setFont("Helvetica", 8)
+        c.drawRightString(width - margin, 10, f"Page {c.getPageNumber()}")
+
+    # Page 1: Summary Statistics (by column)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(margin, height - margin, "Data Analysis Report")
+    c.setFont("Helvetica", 10)
+    y = height - margin - 2 * line_height
+    c.drawString(margin, y, "Summary Statistics by Column:")
+    y -= line_height * 2
+
+    for col, stats in summary.items():
+        if y < 100:
+            draw_page_number()
+            c.showPage()
+            y = height - margin
+
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(margin, y, f"Column: {col}")
+        y -= line_height
+        c.setFont("Helvetica", 10)
+        for stat, value in stats.items():
+            c.drawString(margin + 20, y, f"{stat}: {value}")
+            y -= line_height
+        y -= line_height
+
+    draw_page_number()
     c.showPage()
 
     # Page 2: Missing Data Summary
-    text = c.beginText(margin, height - margin)
-    text.setFont("Helvetica", 10)
-    text.textLine("Missing Data Summary:")
-    missing_str = json.dumps(missing_summary, indent=2)
-    for line in missing_str.splitlines():
-        text.textLine(line)
-    c.drawText(text)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(margin, height - margin, "Missing Data Summary")
+
+    data = [["Column", "Missing Values"]]
+    for col, count in missing_summary.items():
+        data.append([col, str(count)])
+
+    table = Table(data, colWidths=[250, 150])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+    ]))
+    table.wrapOn(c, width, height)
+    table.drawOn(c, margin, height - 200)
+
+    draw_page_number()
     c.showPage()
 
     # Page 3: Outliers Summary
-    text = c.beginText(margin, height - margin)
-    text.setFont("Helvetica", 10)
-    text.textLine("Outliers Summary:")
-    outliers_str = json.dumps(outliers_summary, indent=2)
-    for line in outliers_str.splitlines():
-        text.textLine(line)
-    c.drawText(text)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(margin, height - margin, "Outliers Summary")
+
+    data = [["Column", "Outlier Count", "Lower Bound", "Upper Bound"]]
+    for col, details in outliers_summary.items():
+        data.append([
+            col,
+            str(details.get("count", "")),
+            str(details.get("lower_bound", "")),
+            str(details.get("upper_bound", ""))
+        ])
+
+    table = Table(data, colWidths=[150, 100, 130, 130])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+    ]))
+    table.wrapOn(c, width, height)
+    table.drawOn(c, margin, height - 240)
+
+    draw_page_number()
     c.showPage()
 
     # Page 4: Histogram Plot
     if histogram_plot:
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(margin, height - margin, "Histogram Plot")
         histogram_data = base64.b64decode(histogram_plot)
         histogram_image = Image.open(io.BytesIO(histogram_data))
         histogram_reader = ImageReader(histogram_image)
         c.drawImage(histogram_reader, margin, margin, width=width - 2 * margin, preserveAspectRatio=True, mask='auto')
+        draw_page_number()
         c.showPage()
 
     # Page 5: Correlation Plot
     if correlation_plot:
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(margin, height - margin, "Correlation Matrix")
         correlation_data = base64.b64decode(correlation_plot)
         correlation_image = Image.open(io.BytesIO(correlation_data))
         correlation_reader = ImageReader(correlation_image)
         c.drawImage(correlation_reader, margin, margin, width=width - 2 * margin, preserveAspectRatio=True, mask='auto')
+        draw_page_number()
         c.showPage()
 
     c.save()
