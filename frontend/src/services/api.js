@@ -1,13 +1,13 @@
 import axios from "axios";
 
 // Backend URL
-const baseURL = "https://community-health-dashboard-backend.onrender.com";
+const baseURL = "http://localhost:5000";
 
 // Upload file endpoint
 export const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await axios.post(`${baseURL}/api/upload/csv`, formData, {
+  const response = await axios.post(`${baseURL}/api/upload`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data;
