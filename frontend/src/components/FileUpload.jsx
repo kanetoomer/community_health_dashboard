@@ -183,7 +183,7 @@ export default function FileUpload() {
         <div className="mt-4 inline-flex">
           <input
             type="file"
-            accept=".csv"
+            accept=".csv, .data"
             onChange={handleFileChange}
             className="block w-full text-sm text-gray-500
                        file:mr-4 file:py-2 file:px-4
